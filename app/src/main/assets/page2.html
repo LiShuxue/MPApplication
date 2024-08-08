@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <script>
+    function publish(eventName, params, webviewIds = []) {
+      var paramsString = JSON.stringify(params);
+      var webviewIdString = JSON.stringify(webviewIds);
+
+      console.log('调用webview中注入的原生对象 PageJSBridge.publish')
+      // 调用webview中注入的原生对象 PageJSBridge.publish
+      PageJSBridge.publish(eventName, paramsString, webviewIdString);
+    }
+
+    jsBridge = {
+      publish,
+    }
+
+    function navigateBack() {
+      console.log('html 中发送 navigateBack')
+      jsBridge.publish('navigateBack', { delta: 1 });
+    }
+  </script>
+</head>
+
+<body>
+  <div>test page2</div>
+
+  <div onclick="navigateBack()">back page</div>
+
+  <script>
+    console.log('html 中发送 DOMContentLoaded')
+    jsBridge.publish('DOMContentLoaded');
+  </script>
+
+</body>
+
+</html>

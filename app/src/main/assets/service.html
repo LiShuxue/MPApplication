@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <script>
+    var handlers = {};
+    var webviewIds = {};
+
+    function publish(eventName, params, webviewIds = []) {
+      var paramsString = JSON.stringify(params);
+      var webviewIdString = JSON.stringify(webviewIds);
+      console.log('调用webview中注入的原生对象 AppServiceJSBridge.publish')
+      // 调用webview中注入的原生对象 AppServiceJSBridge.publish
+      AppServiceJSBridge.publish(eventName, paramsString, webviewIdString);
+    }
+
+    function subscribe(eventName, handler) {
+      // 注册回调
+      console.log('注册回调，eventName = ' + eventName);
+      handlers[eventName] = handler;
+    }
+
+    function subscribeHandler(eventName, data, webviewId) {
+      // 执行注册的回调
+      console.log('执行注册的回调，eventName = ' + eventName);
+      var handler = handlers[eventName]
+      handler(data, webviewId);
+    };
+
+    jsBridge = {
+      publish,
+      subscribe,
+      subscribeHandler,
+    }
+
+    jsBridge.subscribe('DOMContentLoaded', function (param, webviewId) {
+      console.log('service.html 中接收 page 的 DOMContentLoaded，webviewId=' + webviewId)
+      webviewIds[param.url] = param.webviewId;
+    });
+  </script>
+</head>
+
+<body>
+  <script>
+    console.log('html 中发送 serviceReady')
+    jsBridge.publish('serviceReady');
+
+    // function setData(dataObj) {
+    //   jsBridge.publish(
+    //     "appDataChange",
+    //     {
+    //       data: dataObj
+    //     },
+    //     [100000]
+    //   );
+    // }
+
+    // setData({ name: "test" });
+  </script>
+</body>
+
+</html>
